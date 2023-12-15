@@ -1,0 +1,15 @@
+.eventDot {
+    margin-right: 5px !important;
+    font-size: 0.6vw !important;
+}
+
+.eventTitle {
+    /*margin: 0 auto !important;*/
+    height: 100% !important;
+    font-size: 2vh;
+    display: flex !important;
+    align-items: center !important;
+    line-height: 2vh !important;
+    text-align: center !important;
+    border-radius: 10%;
+}

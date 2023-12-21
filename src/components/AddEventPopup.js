@@ -2,21 +2,33 @@
 import React from 'react';
 import {Button, Form, Input, DatePicker, ColorPicker} from "antd";
 import './AddEventPopup.css';
+import dayjs from "dayjs";
+import {DeleteOutlined} from "@ant-design/icons";
+import moment from "moment";
+import {useDeleteEntries, useUpdateEntries} from "../requests/requestFunc";
 
 const {RangePicker} = DatePicker
-const AddEventPopup = ({ onCancel, onFinish, isNew }) => {
+
+const AddEventPopup = ({ onCancel, onFinish, isNew, event, deleteEntry }) => {
+    const initialValues = {
+        title: event?.title || '',
+        start: event?.start || moment(),
+        end: event?.end || moment().add(1, 'hour'),
+        color: event?.color || '#1677FF',
+    }
+    //console.log('initialValues: ', initialValues)
     return (
         <div className="popup-container">
             <div className="popup">
                 <div className={'eventPopupLeftRight'}>
                 <Form layout={'vertical'} onFinish={onFinish} >
                     <div className={'title'}>
-                    <Form.Item name="eventTitle">
+                    <Form.Item name="eventTitle" initialValue={initialValues.title}>
                         <Input required placeholder={"Title"}></Input>
                     </Form.Item>
 
-                    <Form.Item name={'colorPicker'}>
-                        <ColorPicker initialValue='#1677FF' disabledAlpha presets={[
+                    <Form.Item name={'colorPicker'} initialValue={initialValues.color}>
+                        <ColorPicker  disabledAlpha presets={[
                             {
                                 label: 'Recommended',
                                 colors: [
@@ -36,12 +48,12 @@ const AddEventPopup = ({ onCancel, onFinish, isNew }) => {
                     </Form.Item>
                     </div>
 
-                    <Form.Item label={"Date"} name="rangepicker">
-                        <RangePicker format="DD.MM.YYYY HH:mm" showTime={{ format: 'HH:mm' }} required></RangePicker>
+                    <Form.Item label={"Date"} name="rangepicker" initialValue={[dayjs(initialValues.start), dayjs(initialValues.end)]}>
+                        <RangePicker  format="DD.MM.YYYY HH:mm" showTime={{ format: 'HH:mm' }} required></RangePicker>
                     </Form.Item>
 
-                    <Form.Item name="isNew" type="hidden" initialValue={isNew} >
-
+                    <Form.Item name="params" type="hidden" initialValue={{isNew: isNew, id: event?.id, allDay: event?.allDay}} >
+                        <input type={'hidden'}/>
                     </Form.Item>
 
                     <div>
@@ -50,6 +62,10 @@ const AddEventPopup = ({ onCancel, onFinish, isNew }) => {
                                 <Button type="primary" htmlType={"submit"}>Save</Button>
                             </Form.Item>
                             <Button onClick={onCancel}>Cancel</Button>
+                            {
+                               !isNew && <Button type='primary' icon={<DeleteOutlined/>} onClick={() => {deleteEntry(event.id)}}></Button>
+                            }
+
                         </div>
                     </div>
 
@@ -67,9 +83,14 @@ const transformMonth = (m) => {
     return (parseInt(m) - 1).toString().padStart(2, '0')
 }
 export const createEvent = (fieldsValue) => {
-    let color = '#1677FF';
-    if (fieldsValue['colorPicker'] !== undefined) {
-        color = fieldsValue['colorPicker'].toHexString();//fieldsValue['colorPicker'];
+    let color = fieldsValue['colorPicker'];
+    /*if (fieldsValue['colorPicker'] !== undefined) {
+        color = fieldsValue['colorPicker'].toHexString()? fieldsValue['colorPicker'].toHexString() : fieldsValue['colorPicker'];
+    }*/
+
+    if(typeof color !== "string")
+    {
+        color = color.toHexString()
     }
 
     const startYear = fieldsValue["rangepicker"][0].format('YYYY');
@@ -83,11 +104,14 @@ export const createEvent = (fieldsValue) => {
     const endDay = fieldsValue["rangepicker"][1].format('DD');
     const endHour = fieldsValue["rangepicker"][1].format('HH');
     const endMinute = fieldsValue["rangepicker"][1].format('mm');
+    const id = fieldsValue['params'].id? fieldsValue['params'].id:undefined;
     const newEvent = {
+        id: id,
         title: fieldsValue["eventTitle"],
         start: new Date(startYear, startMonth, startDay, startHour, startMinute),
         end: new Date(endYear, endMonth, endDay, endHour, endMinute),
         color: color
+
     }
     return newEvent;
 }

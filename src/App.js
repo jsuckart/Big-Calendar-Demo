@@ -7,7 +7,7 @@ import CustomToolbar from "./components/CustomToolbar";
 import AddEventPopup from "./components/AddEventPopup";
 import CustomEvent from "./components/CustomEvent";
 import {lighten, modularScale, rgba} from 'polished'
-import {getFn, useCreateEntries, useEntries} from "./requests/requestFunc";
+import {getFn, useCreateEntries, useDeleteEntries, useEntries, useUpdateEntries} from "./requests/requestFunc";
 import axios from "axios";
 import {createEvent} from "./components/AddEventPopup";
 
@@ -23,20 +23,27 @@ function App() {
          start: new Date(entry.startDate),
          end: new Date(entry.endDate),
          color: entry.color,
-         allDay: entry.allDay
+         allDay: entry.allDay,
+         id: entry._id,
      }))
+
+    console.log('internal :', entries)
 
     //const [allEvents, setAllEvents] = useState(entries)
     const [isAddEventPopupOpen, setIsAddEventPopupOpen] = useState(false)
+    const [isUpdateEventPopupOpen, setIsUpdateEventPopupOpen] = useState(false)
+    const [currentEvent, setCurrentEvent] = useState(null)
 
     const onCancelAddEvent = () => {
         setIsAddEventPopupOpen(false);
+        setIsUpdateEventPopupOpen(false);
     }
 
-    /*
-    function handleAddEvent(newEvent) {
-        setAllEvents([...allEvents, newEvent])
-    }*/
+   const onClickEvent = (event) => {
+        console.log('eventClickHandler: ', event)
+        setCurrentEvent(event);
+       setIsUpdateEventPopupOpen(true);
+   }
 
     const eventStyleGetter = (event, start, end, isSelected) => {
         var backgroundColor = lighten(0.42, event.color);
@@ -55,17 +62,30 @@ function App() {
 
 
     const {mutateAsync: createEntry} = useCreateEntries()
+    const {mutateAsync: updateEntry} = useUpdateEntries()
+    const {mutateAsync: deleteEntry} = useDeleteEntries()
+
+    const deleteEntryFuncArg = (id) =>
+    {
+        deleteEntry(id)
+        setIsUpdateEventPopupOpen(false);
+    }
 
     const onFinish = async (fieldsValue) => {
 
         const newEvent = createEvent(fieldsValue)
-        if(fieldsValue['isNew']) {
-            console.log(newEvent)
+        if(fieldsValue['params'].isNew) {
             createEntry(newEvent)
+        }
+
+        else
+        {
+            updateEntry(newEvent)
         }
 
         //handleAddEvent(newEvent)
         setIsAddEventPopupOpen(false);
+        setIsUpdateEventPopupOpen(false);
     }
 
     const components = {
@@ -77,12 +97,14 @@ function App() {
         <div>
 
             {isAddEventPopupOpen && <AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinish} isNew={true}/>}
+            {isUpdateEventPopupOpen && <AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinish} isNew={false} event={currentEvent} deleteEntry={deleteEntryFuncArg}/>}
             <div style={{height: "100vh"}}>
                 <Calendar components={{
                     toolbar: props => (<CustomToolbar {...props} setIsAddEventPopupOpen={setIsAddEventPopupOpen}/>)
                 }}
 
                           views={['month', 'week', 'day']}
+                          onSelectEvent ={onClickEvent}
                           localizer={localizer}
                           events={entries}
                           startAccessor="start"

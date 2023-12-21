@@ -16,26 +16,26 @@ export const getFn = async () => {
     });
 }*/
 
-
+//-------------------------------------------------------get-------------------------------------------------
 export const useEntries = () => {
     return useQuery({
         queryFn: async () => {
             const {data} = await axios.get('http://localhost:8000/calendar');
+            console.log('form Get: ', data)
             return data;
         },
         queryKey: ['GET_ENTRIES']
     })
 }
 
-
+//-------------------------------------------------------post-------------------------------------------------
 const postEntry = async (newEntry) => {
     const {data} = await axios.post('http://localhost:8000/calendar', {
 
-            title: newEntry.title,
-            startDate: moment(newEntry.start).format(),
-            endDate: moment(newEntry.end).format(),
-            color: newEntry.color,
-            allDay: newEntry.allDay? newEntry.allDay:false,
+        ...newEntry,
+        startDate: moment(newEntry.start).format(),
+        endDate: moment(newEntry.end).format(),
+        allDay: newEntry.allDay? newEntry.allDay:false,
 
     });
     return data;
@@ -49,3 +49,42 @@ export const useCreateEntries = () => {
     }})
 };
 
+//-------------------------------------------------------put-------------------------------------------------
+
+const putEntry = async (newEntry) => {
+    //console.log('putEntry: ', newEntry)
+    const {data} = await axios.put('http://localhost:8000/calendar/' + newEntry.id, {
+
+        title: newEntry.title,
+        color: newEntry.color,
+        startDate: moment(newEntry.start).format(),
+        endDate: moment(newEntry.end).format(),
+        allDay: newEntry.allDay? newEntry.allDay:false,
+
+    });
+    return data;
+
+}
+export const useUpdateEntries = () => {
+    return useMutation({
+        mutationFn: putEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['GET_ENTRIES']);
+        }})
+};
+
+//-------------------------------------------------delete--------------------------------------------
+const deleteEntry = async (id) => {
+    console.log(id+' deleted')
+    const {data} = await axios.delete('http://localhost:8000/calendar/' + id);
+    return data;
+
+}
+export const useDeleteEntries = () => {
+
+    return useMutation({
+        mutationFn: deleteEntry,
+        onSuccess: () => {
+            queryClient.invalidateQueries(['GET_ENTRIES']);
+        }})
+};

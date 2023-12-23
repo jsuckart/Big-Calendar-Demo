@@ -16,36 +16,44 @@ const UploadImportPopup = ({ onCancel,setIsUploadImportPopupOpen}) => {
 
     //Parse csv into array
     const onClickUpload = (fileContent) => {
-        const [keys, ...rest] = fileContent.target.result
-            .trim()
-            .split("\n")
-            .map((item) => item.replace(/['"]/g, '').split(';'));
+        if (fileContent) {
 
-        const formedArr = rest.map((item) => {
-            const object = {};
-            keys.forEach((key, index) => (object[key] = item.at(index)));
-            return object;});
+            const [keys, ...rest] = fileContent.target.result
+                .trim()
+                .split("\n")
+                .map((item) => item.replace(/['"]/g, '').split(';'));
 
-        //create calendar entrys from events and store them
+            const formedArr = rest.map((item) => {
+                const object = {};
+                keys.forEach((key, index) => (object[key] = item.at(index)));
+                return object;
+            });
 
-        //console.log(formedArr[0].TITEL)
-        //console.log((formedArr))
-        formedArr.forEach((tumEntry) => {
-            console.log(tumEntry)
-            const [day, month, year] = tumEntry.DATUM.split(".");
-            const [hourVon, minuteVon] = tumEntry.VON.split(":");
-            const [hourBis, minuteBis] = tumEntry.BIS.split(":");
-            const calendarEntry = {
-                "title": tumEntry.TITEL,
-                start: new Date(year, month-1, day, hourVon, minuteVon),
-                end: new Date(year, month-1, day, hourBis, minuteBis),
-                color: '#1677FF',
-                allDay: false,
-            }
-            createEntry(calendarEntry)
-        })
+            //create calendar entrys from events and store them
 
-        setIsUploadImportPopupOpen(false)
+            //console.log(formedArr[0].TITEL)
+            //console.log((formedArr))
+            formedArr.forEach((tumEntry) => {
+                console.log(tumEntry)
+                const [day, month, year] = tumEntry.DATUM.split(".");
+                const [hourVon, minuteVon] = tumEntry.VON.split(":");
+                const [hourBis, minuteBis] = tumEntry.BIS.split(":");
+                const calendarEntry = {
+                    "title": tumEntry.TITEL,
+                    start: new Date(year, month - 1, day, hourVon, minuteVon),
+                    end: new Date(year, month - 1, day, hourBis, minuteBis),
+                    color: '#1677FF',
+                    allDay: false,
+                }
+                createEntry(calendarEntry)
+            })
+
+            setIsUploadImportPopupOpen(false)
+        }
+        else
+        {
+            //message.error('No file selected')
+        }
     }
 
     const [uploadFileContent, setUploadFileContent] = useState()
@@ -77,8 +85,8 @@ const UploadImportPopup = ({ onCancel,setIsUploadImportPopupOpen}) => {
                     </div>
                 </Form.Item>
                 <div className={"formButtons"}>
+                    <Button type="primary" htmlType={"submit"} onClick={() => {onClickUpload(uploadFileContent)}}>Save</Button>
 
-                    <Button type="primary" onClick={() => {onClickUpload(uploadFileContent)}}>Save</Button>
 
                     <Button onClick={onCancel}>Cancel</Button>
                 </div>

@@ -27,12 +27,17 @@ const CustomToolbar = ({
                            view,
                            views,
                            setIsAddEventPopupOpen,
+                           setIsUploadImportPopupOpen
                        }) =>
 {
     const [viewHook, setViewHook] = useState(views[0]);
     const onOpenAddEvent = () =>
     {
         setIsAddEventPopupOpen(true);
+    }
+
+    const onOpenUploadImportPopup = () => {
+        setIsUploadImportPopupOpen(true)
     }
     const onChangeView = ({ target: { value } }) => {
         console.log('view checked', value);
@@ -48,7 +53,7 @@ const CustomToolbar = ({
                     <Button icon={<RightOutlined />} onClick={() => onNavigate(navigate.NEXT)} type={"text"}></Button>
                 </div>
                 <div className="viewSwitch" >
-                    <Button type={"primary"} style={{marginRight: "10px"}} icon={<UploadOutlined />}></Button>
+                    <Button type={"primary"} onClick={onOpenUploadImportPopup} style={{marginRight: "10px"}} icon={<UploadOutlined />}></Button>
                     <Button type={"primary"} onClick={onOpenAddEvent}>+ add Event</Button>
                 </div>
             </div>

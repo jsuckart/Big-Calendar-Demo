@@ -10,6 +10,7 @@ import {lighten, modularScale, rgba} from 'polished'
 import {getFn, useCreateEntries, useDeleteEntries, useEntries, useUpdateEntries} from "./requests/requestFunc";
 import axios from "axios";
 import {createEvent} from "./components/AddEventPopup";
+import UploadImportPopup from "./components/UploadImportPopup";
 
 
 const localizer = momentLocalizer(moment);
@@ -27,20 +28,27 @@ function App() {
          id: entry._id,
      }))
 
-    console.log('internal :', entries)
+    //console.log('internal :', entries)
 
     //const [allEvents, setAllEvents] = useState(entries)
     const [isAddEventPopupOpen, setIsAddEventPopupOpen] = useState(false)
     const [isUpdateEventPopupOpen, setIsUpdateEventPopupOpen] = useState(false)
+    const [isUploadImportPopupOpen, setIsUploadImportPopupOpen] = useState(false)
     const [currentEvent, setCurrentEvent] = useState(null)
+
+
 
     const onCancelAddEvent = () => {
         setIsAddEventPopupOpen(false);
         setIsUpdateEventPopupOpen(false);
     }
 
+    const onCancelUploadImport = () => {
+        setIsUploadImportPopupOpen(false)
+    }
+
    const onClickEvent = (event) => {
-        console.log('eventClickHandler: ', event)
+       // console.log('eventClickHandler: ', event)
         setCurrentEvent(event);
        setIsUpdateEventPopupOpen(true);
    }
@@ -71,7 +79,7 @@ function App() {
         setIsUpdateEventPopupOpen(false);
     }
 
-    const onFinish = async (fieldsValue) => {
+    const onFinishAddEvent = async (fieldsValue) => {
 
         const newEvent = createEvent(fieldsValue)
         if(fieldsValue['params'].isNew) {
@@ -96,11 +104,12 @@ function App() {
     return (
         <div>
 
-            {isAddEventPopupOpen && <AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinish} isNew={true}/>}
-            {isUpdateEventPopupOpen && <AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinish} isNew={false} event={currentEvent} deleteEntry={deleteEntryFuncArg}/>}
+            {isAddEventPopupOpen && <AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinishAddEvent} isNew={true}/>}
+            {isUpdateEventPopupOpen && <AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinishAddEvent} isNew={false} event={currentEvent} deleteEntry={deleteEntryFuncArg}/>}
+            {isUploadImportPopupOpen && <UploadImportPopup onCancel={onCancelUploadImport} setIsUploadImportPopupOpen={setIsUploadImportPopupOpen}/>}
             <div style={{height: "100vh"}}>
                 <Calendar components={{
-                    toolbar: props => (<CustomToolbar {...props} setIsAddEventPopupOpen={setIsAddEventPopupOpen}/>)
+                    toolbar: props => (<CustomToolbar {...props} setIsAddEventPopupOpen={setIsAddEventPopupOpen} setIsUploadImportPopupOpen={setIsUploadImportPopupOpen}/>)
                 }}
 
                           views={['month', 'week', 'day']}
@@ -121,7 +130,7 @@ function App() {
     components={{toolbar: props => (<CustomToolbar {...props} setIsAddEventPopupOpen={setIsAddEventPopupOpen} />),
                                           event: ({event}) => {return <CustomEvent event={event} color={'#21132'}/>}}}
 
-    //<AddEventPopup onCancel={onCancelAddEvent} onFinish={onFinish}/>}
+    //<AddEventPopup onCancel={onCancelAddEvent} onFinishAddEvent={onFinishAddEvent}/>}
     //const getData = axios.get('http://localhost:8000/calendar').then((response) => {console.log(response)})
      */
 }

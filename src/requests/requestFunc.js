@@ -32,7 +32,8 @@ export const useEntries = () => {
 const postEntry = async (newEntry) => {
     const {data} = await axios.post('http://localhost:8000/calendar', {
 
-        ...newEntry,
+        title: newEntry.title,
+        color: newEntry.color,
         startDate: moment(newEntry.start).format(),
         endDate: moment(newEntry.end).format(),
         allDay: newEntry.allDay? newEntry.allDay:false,
